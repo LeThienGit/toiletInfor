@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Firebase Web App</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            margin: 0;
+            text-align: center;
+        }
+        p {
+            margin: 20px 0;
+            text-align: center;
+            font-size: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            width: 80vw;
+            margin: auto;
+        }
+
+        img {
+        display: block;
+        margin: 0 auto;
+        width: 100px;
+        height: 100px;
+    }
+    </style>
+</head>
+<body>
+    <h1>Toilet Infor</h1>
+        <p id="Hum">Humidity: </p>
+        <p id="Temp">Temperature: </p>
+
+        <p id="OnOffMen1">OnOffMen1: </p>
+        <img id="OnOffImage1" src="" alt="On/Off Image 1" />
+
+        <p id="OnOffMen2">OnOffMen2: </p>
+        <img id="OnOffImage2" src="" alt="On/Off Image 2" />
+
+        <p id="OnOffWoman">OnOffWoman: </p>
+        <img id="OnOffImage" src="" alt="On/Off Image" />
+
+        <p id="CityTemp">City Temperature: </p>
+        <p id="CityHum">City Humidity: </p>
+    <div class="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+        apiKey: "AIzaSyAqIWYlgIsBpMadF-PyymPRqtsjCbMWpIc",
+        authDomain: "toilet-infor-65689.firebaseapp.com",
+        databaseURL: "https://toilet-infor-65689-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "toilet-infor-65689",
+        storageBucket: "toilet-infor-65689.appspot.com",
+        messagingSenderId: "818547516480",
+        appId: "1:818547516480:web:df175ca2ca8c861fda2ba5",
+        measurementId: "G-M0FK4ZWZNJ"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        var dbRef = firebase.database().ref().child("roomMen");
+            dbRef.on('value', function(snapshot) {
+                var data = snapshot.val();
+                document.getElementById("Temp").innerHTML = "Temperature: " + data.Temp;
+                document.getElementById("Hum").innerHTML = "Humidity: " + data.Hum;
+
+                document.getElementById("OnOffMen1").innerHTML = "On/Off: " + data.OnOffMen1;
+                var imageSrc = data.OnOffMen1 == 1 ? "light-off.png" : "light-on.png";
+                document.getElementById("OnOffImage1").src = imageSrc;
+
+                document.getElementById("OnOffMen2").innerHTML = "On/Off: " + data.OnOffMen2;
+                var imageSrc = data.OnOffMen2 == 1 ? "light-off.png" : "light-on.png";
+                document.getElementById("OnOffImage2").src = imageSrc;
+
+                document.getElementById("OnOffWoman").innerHTML = "On/Off: " + data.OnOffWoman;
+                var imageSrc = data.OnOffWoman == 1 ? "light-off.png" : "light-on.png";
+                document.getElementById("OnOffImage").src = imageSrc;
+            });
+
+        //OpenWeatherMap API
+        fetch('http://api.openweathermap.org/data/2.5/forecast?q=Ho%20Chi%20Minh&appid=e450136a499166c6765127ce97a26861&units=metric')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("CityTemp").innerHTML = "City Temperature: " + data.list[0].main.temp;
+            document.getElementById("CityHum").innerHTML = "City Humidity: " + data.list[0].main.humidity;
+
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.list.map(item => new Date(item.dt_txt)),
+                    datasets: [{
+                        label: 'Temperature',
+                        data: data.list.map(item => item.main.temp),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false
+                    }, {
+                        label: 'Humidity',
+                        data: data.list.map(item => item.main.humidity),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
